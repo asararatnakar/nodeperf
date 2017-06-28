@@ -14,8 +14,6 @@
  *  limitations under the License.
  */
 'use strict';
-var log4js = require('log4js');
-var logger = log4js.getLogger('SampleWebApp');
 var express = require('express');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
@@ -29,6 +27,8 @@ var bearerToken = require('express-bearer-token');
 var cors = require('cors');
 var config = require('./config.json');
 var helper = require('./app/helper.js');
+var logger = helper.getLogger('SampleWebApp');
+logger.setLevel('DEBUG');
 var channels = require('./app/create-channel.js');
 var join = require('./app/join-channel.js');
 var install = require('./app/install-chaincode.js');

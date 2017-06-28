@@ -28,7 +28,7 @@ var queryChaincode = function(peer, channelName, chaincodeName, fcn, args, usern
 	var client = helper.getClientForOrg(org, channelName);
 	var target = buildTarget(peer, org);
 
-	return helper.getRegisteredUsers(username, org).then((user) => {
+	return helper.getUser(username, org).then((user) => {
 		tx_id = client.newTransactionID();
 		// send query
 		var request = {
@@ -68,7 +68,7 @@ var getBlockByNumber = function(peer, blockNumber, username, org, channelName) {
 	var target = buildTarget(peer, org);
 	var channel = helper.getChannelForOrg(org, channelName);
 
-	return helper.getRegisteredUsers(username, org).then((member) => {
+	return helper.getUser(username, org).then((member) => {
 		return channel.queryBlock(parseInt(blockNumber), target);
 	}, (err) => {
 		logger.info('Failed to get submitter "' + username + '"');
@@ -97,7 +97,7 @@ var getTransactionByID = function(peer, trxnID, username, org, channelName) {
 	var target = buildTarget(peer, org);
 	var channel = helper.getChannelForOrg(org, channelName);
 
-	return helper.getRegisteredUsers(username, org).then((member) => {
+	return helper.getUser(username, org).then((member) => {
 		return channel.queryTransaction(trxnID, target);
 	}, (err) => {
 		logger.info('Failed to get submitter "' + username + '"');
@@ -124,7 +124,7 @@ var getBlockByHash = function(peer, hash, username, org, channelName) {
 	var target = buildTarget(peer, org);
 	var channel = helper.getChannelForOrg(org, channelName);
 
-	return helper.getRegisteredUsers(username, org).then((member) => {
+	return helper.getUser(username, org).then((member) => {
 		return channel.queryBlockByHash(Buffer.from(hash), target);
 	}, (err) => {
 		logger.info('Failed to get submitter "' + username + '"');
@@ -151,7 +151,7 @@ var getChannelInfo = function(peer, username, org, channelName) {
 	var target = buildTarget(peer, org);
 	var channel = helper.getChannelForOrg(org, channelName);
 
-	return helper.getRegisteredUsers(username, org).then((member) => {
+	return helper.getUser(username, org).then((member) => {
 		return channel.queryInfo(target);
 	}, (err) => {
 		logger.info('Failed to get submitter "' + username + '"');
@@ -228,7 +228,7 @@ var getChannels = function(peer, username, org) {
 	var target = buildTarget(peer, org);
 	var client = helper.getClientForOrg(org);
 
-	return helper.getRegisteredUsers(username, org).then((member) => {
+	return helper.getUser(username, org).then((member) => {
 		//channel.setPrimaryPeer(targets[0]);
 		return client.queryChannels(target);
 	}, (err) => {

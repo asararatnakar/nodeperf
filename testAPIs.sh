@@ -31,7 +31,6 @@ ORG2_TOKEN=$(echo $ORG2_TOKEN | jq ".token" | sed "s/\"//g")
 echo
 echo "ORG2 token is $ORG2_TOKEN"
 echo
-
 echo "POST request Enroll user 'Ratz' on Org1  ..."
 echo
 TEMP_TOKEN=$(curl -s -X POST \
@@ -41,6 +40,8 @@ TEMP_TOKEN=$(curl -s -X POST \
 TEMP_TOKEN=$(echo $TEMP_TOKEN | jq ".token" | sed "s/\"//g")
 echo
 echo "GET request to revoke user 'Ratz' on Org1  ..."
+echo "Copy user certs"
+cp -r /tmp/fabric-client-kvs_peerOrg1/* $HOME/.hfc-key-store/ && cp -r /tmp/fabric-client-kvs_peerOrg2/* $HOME/.hfc-key-store/
 echo
 curl -s -X GET \
   "http://localhost:4000/revoke" \
@@ -235,7 +236,6 @@ curl -s -X GET \
   -H "content-type: application/json"
 echo
 echo
-
 
 echo "POST invoke chaincode on peers of Org1 on mychannel2"
 echo

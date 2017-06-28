@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 function getLogs(){
 	## If no containers running return
 	CONTAINERS=$(docker ps -a | wc -l)
@@ -28,6 +28,9 @@ function getLogs(){
 	docker logs peer1.org1.example.com &> peer1_org1.txt
 	docker logs peer0.org2.example.com &> peer0_org2.txt
 	docker logs peer1.org2.example.com &> peer1_org2.txt
+
+	docker logs ca_peerOrg1 &> caOrg1.txt
+	docker logs ca_peerOrg1 &> caOrg2.txt
 
 	if [ ! -d logs ]; then
 		mkdir logs
