@@ -150,6 +150,7 @@ do
 			\"args\":[\"\"]
 		}"
 		echo
+		sleep 1
 	done
 done
 
@@ -176,11 +177,12 @@ do
 		  -H "authorization: Bearer $ORG1_TOKEN" \
 		  -H "content-type: application/json" \
 		  -d "{
-			\"peers\": [\"localhost:7051\", \"localhost:8051\"],
+			\"peers\": [\"localhost:7051\"],
 			\"fcn\":\"put\",
 			\"args\":[\"$ORG1_KEY\",\"$ORG1_VAL\"]
 		      }")
 	        printf "Transaction on ORG1 on mycc$cc, TRX_ID $TRX\n"
+		sleep 1
 		ORG1_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer1&fcn=get&args=%5B%22$ORG1_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG1_TOKEN" \
@@ -199,11 +201,12 @@ do
 		  -H "authorization: Bearer $ORG2_TOKEN" \
 		  -H "content-type: application/json" \
 		  -d "{
-			\"peers\": [\"localhost:9051\", \"localhost:10051\"],
+			\"peers\": [\"localhost:9051\"],
 			\"fcn\":\"put\",
 			\"args\":[\"$ORG2_KEY\",\"$ORG2_VAL\"]
 		}")
 		printf "Transaction on ORG2 on mycc$cc, TRX_ID $TRX\n"
+		sleep 1
 		ORG2_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer1&fcn=get&args=%5B%22$ORG2_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG2_TOKEN" \
@@ -228,6 +231,7 @@ do
 			\"args\":[\"$ORG1_KEY\",\"$ORG1_VAL\"]
 		      }")
 	        printf "Transaction on ORG1 on mycc$cc, TRX_ID $TRX\n"
+		sleep 1
 		ORG1_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer2&fcn=get&args=%5B%22$ORG1_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG1_TOKEN" \
@@ -251,6 +255,7 @@ do
 			\"args\":[\"$ORG2_KEY\",\"$ORG2_VAL\"]
 		}")
 		printf "Transaction on ORG2 on mycc$cc, TRX_ID $TRX\n"
+		sleep 1
 		ORG2_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer2&fcn=get&args=%5B%22$ORG2_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG2_TOKEN" \

@@ -6,7 +6,7 @@
    "totalChannels": 100,
    "GOPATH":"../artifacts",
    "keyValueStore":"/tmp/fabric-client-kvs",
-   "eventWaitTime":"30000",
+   "eventWaitTime":"45000",
    "users":[
       {
          "username":"admin",
