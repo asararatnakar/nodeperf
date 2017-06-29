@@ -17,8 +17,8 @@ services:
       # bridge network as the peers
       # https://docs.docker.com/compose/networking/
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
-      - CORE_LOGGING_LEVEL=ERROR
-      #- CORE_LOGGING_LEVEL=DEBUG
+      #- CORE_LOGGING_LEVEL=ERROR
+      - CORE_LOGGING_LEVEL=DEBUG
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_ENDORSER_ENABLED=true
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
@@ -33,8 +33,8 @@ services:
   orderer:
     image: hyperledger/fabric-orderer:${IMAGE_TAG}
     environment:
-      #- ORDERER_GENERAL_LOGLEVEL=debug
-      - ORDERER_GENERAL_LOGLEVEL=ERROR
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      #- ORDERER_GENERAL_LOGLEVEL=ERROR
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesis.block

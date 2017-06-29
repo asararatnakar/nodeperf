@@ -16,7 +16,7 @@
 'use strict';
 var log4js = require('log4js');
 var logger = log4js.getLogger('Helper');
-logger.setLevel('ERROR');
+logger.setLevel('DEBUG');
 
 var path = require('path');
 var util = require('util');
@@ -395,7 +395,7 @@ var setupChaincodeDeploy = function () {
 
 var getLogger = function (moduleName) {
 	var logger = log4js.getLogger(moduleName);
-	logger.setLevel('ERROR');
+	logger.setLevel('DEBUG');
 	return logger;
 };
 

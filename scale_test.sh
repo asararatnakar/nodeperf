@@ -8,12 +8,13 @@ if [ $? -ne 0 ]; then
 fi
 starttime=$(date +%s)
 TOTAL_CHANNELS=$1
-: ${TOTAL_CHANNELS:=50}
+: ${TOTAL_CHANNELS:=2}
 TOTAL_CCS=$2
-: ${TOTAL_CCS:=10}
+: ${TOTAL_CCS:=2}
+printf "\nTotal Channels : $TOTAL_CHANNELS\n"
+printf "Total Chaincodes : $TOTAL_CCS\n"
 
-echo "POST request Enroll user 'Jim' on Org1  ..."
-echo
+printf "\nPOST request Enroll user 'Jim' on Org1  ...\n"
 ORG1_TOKEN=$(curl -s -X POST \
   http://localhost:4000/users \
   -H "content-type: application/x-www-form-urlencoded" \
@@ -102,7 +103,7 @@ sleep 5
 for (( i=1;i<=$TOTAL_CCS;i=$i+1 )) 
 do
 
-echo "POST Install chaincode on Org1"
+printf "\nPOST Install chaincode mycc$i on Org2\n"
 echo
 curl -s -X POST \
   http://localhost:4000/chaincodes \
@@ -115,11 +116,7 @@ curl -s -X POST \
 	\"chaincodeVersion\":\"v0\"
 }"
 
-echo
-echo
-
-echo "POST Install chaincode on Org2"
-echo
+printf "\nPOST Install chaincode mycc$i on Org2\n"
 curl -s -X POST \
   http://localhost:4000/chaincodes \
   -H "authorization: Bearer $ORG2_TOKEN" \
@@ -130,8 +127,6 @@ curl -s -X POST \
 	\"chaincodePath\":\"github.com/uniqueKeyValue\",
 	\"chaincodeVersion\":\"v0\"
 }"
-echo
-echo
 done
 
 
@@ -186,12 +181,8 @@ do
 			\"args\":[\"$ORG1_KEY\",\"$ORG1_VAL\"]
 		      }")
 	        printf "Transaction on ORG1 on mycc$cc, TRX_ID $TRX\n"
-		ORG1_Q_RES1=$(curl -s -X GET \
+		ORG1_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer1&fcn=get&args=%5B%22$ORG1_KEY%22%5D" \
-		  -H "authorization: Bearer $ORG1_TOKEN" \
-		  -H "content-type: application/json")
-		ORG1_Q_RES2=$(curl -s -X GET \
-		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer2&fcn=get&args=%5B%22$ORG1_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG1_TOKEN" \
 		  -H "content-type: application/json")
 
@@ -200,8 +191,7 @@ do
 		#printf "\nQUERY RES1 - $ORG1_Q_RES1\n"
 		#printf "\nQUERY RES2 - $ORG1_Q_RES2\n"
 
-		validateResults $ORG1_Q_RES1 $ORG1_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER0/ORG1 failed"
-		validateResults $ORG1_Q_RES2 $ORG1_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER1/ORG1 failed"
+		validateResults $ORG1_Q_RES $ORG1_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER1/ORG1 failed"
 
 		ORG2_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
 		ORG2_VAL=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
@@ -214,11 +204,54 @@ do
 			\"args\":[\"$ORG2_KEY\",\"$ORG2_VAL\"]
 		}")
 		printf "Transaction on ORG2 on mycc$cc, TRX_ID $TRX\n"
-		ORG2_Q_RES1=$(curl -s -X GET \
+		ORG2_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer1&fcn=get&args=%5B%22$ORG2_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG2_TOKEN" \
 		  -H "content-type: application/json")
-		ORG2_Q_RES2=$(curl -s -X GET \
+
+		#printf "\nORG2  Key  - $ORG2_KEY\n"
+		#printf "\nORG2  Val  - $ORG2_VAL\n"
+		#printf "\nQUERY RES1 - $ORG2_Q_RES1\n"
+		#printf "\nQUERY RES2 - $ORG2_Q_RES2\n"
+		validateResults $ORG2_Q_RES $ORG2_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER1/ORG1 failed"
+
+
+		ORG1_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
+		ORG1_VAL=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
+
+		TRX=$(curl -s -X POST http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc \
+		  -H "authorization: Bearer $ORG1_TOKEN" \
+		  -H "content-type: application/json" \
+		  -d "{
+			\"peers\": [\"localhost:8051\"],
+			\"fcn\":\"put\",
+			\"args\":[\"$ORG1_KEY\",\"$ORG1_VAL\"]
+		      }")
+	        printf "Transaction on ORG1 on mycc$cc, TRX_ID $TRX\n"
+		ORG1_Q_RES=$(curl -s -X GET \
+		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer2&fcn=get&args=%5B%22$ORG1_KEY%22%5D" \
+		  -H "authorization: Bearer $ORG1_TOKEN" \
+		  -H "content-type: application/json")
+
+		#printf "\nORG1  Key  - $ORG1_KEY\n"
+		#printf "\nORG1  Val  - $ORG1_VAL\n"
+		#printf "\nQUERY RES1 - $ORG1_Q_RES1\n"
+		#printf "\nQUERY RES2 - $ORG1_Q_RES2\n"
+
+		validateResults $ORG1_Q_RES $ORG1_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER2/ORG1 failed"
+
+		ORG2_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
+		ORG2_VAL=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
+		TRX=$(curl -s -X POST http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc \
+		  -H "authorization: Bearer $ORG2_TOKEN" \
+		  -H "content-type: application/json" \
+		  -d "{
+			\"peers\": [\"localhost:10051\"],
+			\"fcn\":\"put\",
+			\"args\":[\"$ORG2_KEY\",\"$ORG2_VAL\"]
+		}")
+		printf "Transaction on ORG2 on mycc$cc, TRX_ID $TRX\n"
+		ORG2_Q_RES=$(curl -s -X GET \
 		  "http://localhost:4000/channels/mychannel$ch/chaincodes/mycc$cc?peer=peer2&fcn=get&args=%5B%22$ORG2_KEY%22%5D" \
 		  -H "authorization: Bearer $ORG2_TOKEN" \
 		  -H "content-type: application/json")
@@ -227,9 +260,9 @@ do
 		#printf "\nORG2  Val  - $ORG2_VAL\n"
 		#printf "\nQUERY RES1 - $ORG2_Q_RES1\n"
 		#printf "\nQUERY RES2 - $ORG2_Q_RES2\n"
-		validateResults $ORG2_Q_RES1 $ORG2_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER0/ORG1 failed"
-		validateResults $ORG2_Q_RES2 $ORG2_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER1/ORG1 failed"
-		COUNTER=` expr $COUNTER + 2 `
+		validateResults $ORG2_Q_RES $ORG2_VAL "Query on mychannel$ch on chaincode mycc$cc on PEER2/ORG1 failed"
+
+		COUNTER=` expr $COUNTER + 4 `
 	done
 	printf "\n########### Transactions completed so far $COUNTER ##############\n"
 done
