@@ -16,16 +16,18 @@ function usage () {
   echo "     -c enable CouchDB"
   echo "     -l capture docker logs before network teardown"
   echo "     -t <release-tag> - ex: alpha | beta | rc , missing this option will result in using the latest docker images"
+  echo "     -g generate artifacts (certs , genesis block and channel transaction"
+  echo "     -d clear/delete all the artifacts"
   echo
   echo "Some possible options:"
   echo
   echo "	runApp.sh"
-  echo "	runApp.sh -l"
+  echo "	runApp.sh -l filename"
   echo "	runApp.sh -m restart -t beta"
   echo "	runApp.sh -m start -c"
   echo "	runApp.sh -m stop"
   echo "	runApp.sh -m start -t rc1"
-  echo "	runApp.sh -m stop -l"
+  echo "	runApp.sh -m stop -l default"
   echo
   echo "All defaults:"
   echo "	runApp.sh"
@@ -34,7 +36,7 @@ function usage () {
 }
 
 # Parse commandline args
-while getopts "h?m:t:cl" opt; do
+while getopts "h?m:t:l:cgd" opt; do
   case "$opt" in
     h|\?)
       usage
@@ -44,7 +46,12 @@ while getopts "h?m:t:cl" opt; do
     ;;
     c)  COUCHDB='y'
     ;;
-    l)  ENABLE_LOGS='y'
+    d)  DELETE_ARTIFACTS='y'
+    ;;
+    g)  REGENERATE='y'
+    ;;
+    l)  FILE_NAME="$OPTARG"
+	ENABLE_LOGS='y'
     ;;
     t)  TAG="$OPTARG"
 	if [ "$TAG" == "beta" -o "$TAG" == "rc1" ]; then
@@ -61,10 +68,13 @@ done
 : ${IMAGE_TAG:="latest"}
 : ${COUCHDB:="n"}
 : ${ENABLE_LOGS:="n"}
+: ${DELETE_ARTIFACTS:="n"}
+: ${REGENERATE:="n"}
 export IMAGE_TAG
 
 COMPOSE_FILE=./artifacts/docker-compose.yaml
 COMPOSE_FILE_WITH_COUCH=./artifacts/docker-compose-couch.yaml
+
 function dkcl(){
         CONTAINERS=$(docker ps -a|wc -l)
         if [ "$CONTAINERS" -gt "1" ]; then
@@ -102,6 +112,7 @@ function installNodeModules() {
         fi
         echo
 }
+
 function checkForDockerImages() {
 	DOCKER_IMAGES=$(docker images | grep "$IMAGE_TAG" | wc -l)
 	if [ $DOCKER_IMAGES -ne 9 ]; then
@@ -112,6 +123,13 @@ function checkForDockerImages() {
 	fi
 }
 
+function cleanupArtifacts() {
+	### Let's not worry about clearing about Org certs ?
+        #rm -rf ./artifacts/crypto-config
+
+	rm -rf ./artifacts/channel/*.block ./artifacts/channel/*.tx
+}
+
 function startApp() {
   	if [ "$IMAGE_TAG" = "latest" ]; then
 		printf "\n ========= Using latest Docker images ===========\n"
@@ -120,10 +138,16 @@ function startApp() {
 		checkForDockerImages
   	fi
 	### Let's not worry about dynamic generation of Org certs and channel artifacts 
-  	#source artifacts/generateArtifacts.sh
+	if [ "$REGENERATE" = "y" -o ! -f $PWD/artifacts/channel/genesis.block ]; then
+		printf "\n============ Certs are missing , Generating Org certs & artifacts !!! =============\n"
+		cleanupArtifacts
+		source artifacts/generateArtifacts.sh
+	else
+		printf "\n============ Use existing Org certs =============\n"
+	fi
 
 	#Launch the network
-	if [ "$COUCHDB" = "y" -o "$COUCHDB" = "Y" ]; then
+	if [ "$COUCHDB" = "y" ]; then
 		docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_WITH_COUCH up -d
 	else 
 		docker-compose -f $COMPOSE_FILE up -d
@@ -142,9 +166,14 @@ function startApp() {
 
 function shutdownApp() {
 	printf "\n======================= TEARDOWN NETWORK ====================\n"
-	if [ "$ENABLE_LOGS" = "y" -o "$ENABLE_LOGS" = "Y" ]; then
-		source ./artifacts/getContainerLogs.sh
+	if [ "$ENABLE_LOGS" = "y" ]; then
+		if [ "$FILE_NAME" = "default" ]; then
+			source ./artifacts/getContainerLogs.sh
+		else
+			source ./artifacts/getContainerLogs.sh $FILE_NAME
+		fi
 	fi
+
 	# teardown the network and clean the containers and intermediate images
 	docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_WITH_COUCH down
 	dkcl
@@ -154,8 +183,10 @@ function shutdownApp() {
 	printf "\n======================= CLEANINGUP ARTIFACTS ====================\n\n"
 	rm -rf /tmp/hfc-test-kvs_peerOrg* $HOME/.hfc-key-store/ /tmp/fabric-client-kvs_peerOrg*
 
-	### Let's not worry about clearing about Org certs and channel artifacts 
-	#rm -rf ./artifacts/channel/*.block channel/*.tx ./artifacts/crypto-config
+	### Clear/delet Org certs and channel artifacts (orderer block + channel cfg trxns)
+	if [ "$DELETE_ARTIFACTS" = "y" ]; then
+		cleanupArtifacts
+	fi
 }
 
 #Launch the network using docker compose
