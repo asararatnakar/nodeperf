@@ -68,6 +68,8 @@ function generateChannelArtifacts() {
 		echo "### Generating channel configuration transaction '$CHANNEL_NAME$i.tx' ###"
 		echo "#################################################################"
 		$CONFIGTXGEN -profile TwoOrgsChannel -outputCreateChannelTx ./channel/$CHANNEL_NAME$i.tx -channelID $CHANNEL_NAME$i
+		$CONFIGTXGEN -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel/Org1MSPanchors$i.tx -channelID $CHANNEL_NAME$i -asOrg Org1MSP
+		$CONFIGTXGEN -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel/Org2MSPanchors$i.tx -channelID $CHANNEL_NAME$i -asOrg Org2MSP
 		echo
 	done
 }

@@ -32,6 +32,7 @@ var queryChaincode = function(peer, channelName, chaincodeName, fcn, args, usern
 		tx_id = client.newTransactionID();
 		// send query
 		var request = {
+			targets: [target],
 			chaincodeId: chaincodeName,
 			txId: tx_id,
 			fcn: fcn,
