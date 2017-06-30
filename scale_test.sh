@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 jq --version > /dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "Please Install 'jq' https://stedolan.github.io/jq/ to execute this script"
@@ -66,7 +66,7 @@ curl -s -X POST \
 	\"peers\": [\"localhost:7051\",\"localhost:8051\"]
 }"
 
-echo "\n\nPOST request Join channel on Org2\n"
+printf "\n\nPOST request Join channel on Org2\n"
 curl -s -X POST \
   http://localhost:4000/channels/mychannel$i/peers \
   -H "authorization: Bearer $ORG2_TOKEN" \
@@ -76,33 +76,33 @@ curl -s -X POST \
 }"
 echo
 done
-sleep 5
-for (( i=1;i<=$TOTAL_CHANNELS;i=$i+1 ))
-do
-printf "\nPOST request Update channel with AnchorPeer of Org1\n"
-echo
-curl -s -X POST \
-  http://localhost:4000/channels \
-  -H "authorization: Bearer $ORG1_TOKEN" \
-  -H "content-type: application/json" \
-  -d "{
-	\"channelName\":\"mychannel$i\",
-	\"channelConfigPath\":\"../artifacts/channel/Org1MSPanchors$i.tx\",
- \"configUpdate\":true
-}"
-echo
-printf "\nPOST request Update channel with AnchorPeer of Org2\n"
-echo
-curl -s -X POST \
-  http://localhost:4000/channels \
-  -H "authorization: Bearer $ORG1_TOKEN" \
-  -H "content-type: application/json" \
-  -d "{
-	\"channelName\":\"mychannel$i\",
-	\"channelConfigPath\":\"../artifacts/channel/Org2MSPanchors$i.tx\",
- \"configUpdate\":true
-}"
-done
+#sleep 5
+#for (( i=1;i<=$TOTAL_CHANNELS;i=$i+1 ))
+#do
+#printf "\nPOST request Update channel with AnchorPeer of Org1\n"
+#echo
+#curl -s -X POST \
+#  http://localhost:4000/channels \
+#  -H "authorization: Bearer $ORG1_TOKEN" \
+#  -H "content-type: application/json" \
+#  -d "{
+#	\"channelName\":\"mychannel$i\",
+#	\"channelConfigPath\":\"../artifacts/channel/Org1MSPanchors$i.tx\",
+#  \"configUpdate\":true
+#}"
+#echo
+#printf "\nPOST request Update channel with AnchorPeer of Org2\n"
+#echo
+#curl -s -X POST \
+#  http://localhost:4000/channels \
+#  -H "authorization: Bearer $ORG1_TOKEN" \
+#  -H "content-type: application/json" \
+#  -d "{
+#	\"channelName\":\"mychannel$i\",
+#	\"channelConfigPath\":\"../artifacts/channel/Org2MSPanchors$i.tx\",
+#  \"configUpdate\":true
+#}"
+#done
 sleep 5
 for (( i=1;i<=$TOTAL_CCS;i=$i+1 ))
 do
